@@ -18,20 +18,36 @@ app.set("trust proxy", true);
 // This ensures ALL preflight (OPTIONS) requests are handled correctly with credentials
 console.log("🔐 Configuring CORS...");
 
-// CORS middleware with specific origin for credentials support
+// Get allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
+  : ["http://localhost:5173"];
+
+console.log("🌐 Allowed CORS origins:", allowedOrigins);
+
+// CORS middleware with dynamic origin support for credentials
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        allowedOrigins.includes("*")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     optionsSuccessStatus: 200,
-  })
+  }),
 );
 
-console.log(
-  "✅ CORS enabled for http://localhost:5173 with credentials support"
-);
+console.log("✅ CORS enabled with credentials support");
 console.log("✅ Preflight (OPTIONS) handler registered");
 
 // Security

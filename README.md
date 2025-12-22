@@ -27,7 +27,15 @@ PORT=5000
 MONGO_URI=mongodb+srv://mariarais1906_db_user:K22eCQ.n4JCH@cluster0.npzidbh.mongodb.net/?appName=Cluster0
 AUTH_SECRET=your-super-secret-key-change-this-in-production-2025
 NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
 ```
+
+**Important for Deployment:**
+- `CORS_ORIGIN`: Comma-separated list of allowed frontend URLs. For production, add your deployed frontend URL:
+  ```
+  CORS_ORIGIN=http://localhost:5173,https://your-production-frontend.com
+  ```
+- See `ENV_VARIABLES.md` for complete environment variables documentation
 
 ### Running the Server
 
@@ -407,8 +415,12 @@ NODE_ENV=development
 
 **CORS Error**
 
-- Verify frontend URL in CORS config
-- Default: http://localhost:5173
+- Set `CORS_ORIGIN` environment variable with your frontend URL(s)
+- For multiple origins, use comma-separated list: `CORS_ORIGIN=http://localhost:5173,https://your-frontend.com`
+- Default: `http://localhost:5173`
+- Check browser console for the actual origin making the request
+- Ensure no trailing slashes in URLs
+- Verify protocol (http vs https) matches exactly
 
 ---
 
