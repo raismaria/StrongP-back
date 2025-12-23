@@ -14,9 +14,6 @@ export async function getProducts(req, res) {
       limit = 10,
       page = 1,
     } = req.query;
-
-    console.log("category", category);
-
     // Build filter
     const filter = {};
 

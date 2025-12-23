@@ -10,6 +10,9 @@ import {
   updateCategory,
   deleteCategory,
   getAdminProducts,
+  getAllOrders,
+  updateOrderStatusAdmin,
+  deleteOrder,
 } from "../handlers/admin.js";
 
 const adminRouter = Router();
@@ -33,5 +36,10 @@ adminRouter.delete("/categories/:id", deleteCategory);
 
 // Products management (admin view)
 adminRouter.get("/products", getAdminProducts);
+
+// Orders management
+adminRouter.get("/orders", getAllOrders);
+adminRouter.put("/orders/:id/status", updateOrderStatusAdmin);
+adminRouter.delete("/orders/:id", deleteOrder);
 
 export default adminRouter;

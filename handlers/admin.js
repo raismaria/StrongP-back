@@ -20,7 +20,7 @@ export async function getDashboardStats(req, res) {
     const orders = await Order.find().select("total");
     const totalRevenue = orders.reduce(
       (sum, order) => sum + (order.total || 0),
-      0
+      0,
     );
 
     // Get recent products
@@ -48,7 +48,7 @@ export async function getDashboardStats(req, res) {
         recentProducts,
         recentUsers,
       },
-      "Dashboard stats fetched successfully"
+      "Dashboard stats fetched successfully",
     );
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
@@ -56,7 +56,7 @@ export async function getDashboardStats(req, res) {
       res,
       error,
       "Failed to fetch dashboard stats",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -86,7 +86,7 @@ export async function getAllUsers(req, res) {
         page: parseInt(page),
         pages: Math.ceil(total / parseInt(limit)),
       },
-      "Users fetched successfully"
+      "Users fetched successfully",
     );
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -94,7 +94,7 @@ export async function getAllUsers(req, res) {
       res,
       error,
       "Failed to fetch users",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -113,14 +113,14 @@ export async function updateUserRole(req, res) {
         res,
         null,
         "Invalid role. Must be 'Admin' or 'User'",
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
     const user = await User.findByIdAndUpdate(
       id,
       { role },
-      { new: true }
+      { new: true },
     ).select("-password");
 
     if (!user) {
@@ -134,7 +134,7 @@ export async function updateUserRole(req, res) {
       res,
       error,
       "Failed to update user role",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -153,7 +153,7 @@ export async function deleteUser(req, res) {
         res,
         null,
         "You cannot delete your own account",
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
@@ -170,7 +170,7 @@ export async function deleteUser(req, res) {
       res,
       error,
       "Failed to delete user",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -190,7 +190,7 @@ export async function getAllCategories(req, res) {
       res,
       error,
       "Failed to fetch categories",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -208,7 +208,7 @@ export async function createCategory(req, res) {
         res,
         null,
         "Category name is required",
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
@@ -219,7 +219,7 @@ export async function createCategory(req, res) {
         res,
         null,
         "Category already exists",
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
@@ -230,7 +230,7 @@ export async function createCategory(req, res) {
       res,
       category,
       "Category created successfully",
-      StatusCodes.CREATED
+      StatusCodes.CREATED,
     );
   } catch (error) {
     console.error("Error creating category:", error);
@@ -238,7 +238,7 @@ export async function createCategory(req, res) {
       res,
       error,
       "Failed to create category",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -257,7 +257,7 @@ export async function updateCategory(req, res) {
         res,
         null,
         "Category name is required",
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
@@ -271,14 +271,14 @@ export async function updateCategory(req, res) {
         res,
         null,
         "Another category with this name already exists",
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
     const category = await Category.findByIdAndUpdate(
       id,
       { name: name.trim() },
-      { new: true }
+      { new: true },
     );
 
     if (!category) {
@@ -286,7 +286,7 @@ export async function updateCategory(req, res) {
         res,
         null,
         "Category not found",
-        StatusCodes.NOT_FOUND
+        StatusCodes.NOT_FOUND,
       );
     }
 
@@ -297,7 +297,7 @@ export async function updateCategory(req, res) {
       res,
       error,
       "Failed to update category",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -317,7 +317,7 @@ export async function deleteCategory(req, res) {
         res,
         null,
         `Cannot delete category: ${productsCount} product(s) use this category`,
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
@@ -328,7 +328,7 @@ export async function deleteCategory(req, res) {
         res,
         null,
         "Category not found",
-        StatusCodes.NOT_FOUND
+        StatusCodes.NOT_FOUND,
       );
     }
 
@@ -339,7 +339,7 @@ export async function deleteCategory(req, res) {
       res,
       error,
       "Failed to delete category",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -374,7 +374,7 @@ export async function getAdminProducts(req, res) {
         page: parseInt(page),
         pages: Math.ceil(total / parseInt(limit)),
       },
-      "Products fetched successfully"
+      "Products fetched successfully",
     );
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -382,7 +382,133 @@ export async function getAdminProducts(req, res) {
       res,
       error,
       "Failed to fetch products",
-      StatusCodes.INTERNAL_SERVER_ERROR
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+/**
+ * Get all orders (admin only)
+ * GET /api/admin/orders
+ */
+export async function getAllOrders(req, res) {
+  try {
+    const { page = 1, limit = 10, status } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const filter = {};
+    if (status) {
+      filter.status = status;
+    }
+
+    const orders = await Order.find(filter)
+      .populate("user", "name email")
+      .populate("items.productId", "name price images")
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(skip);
+
+    const total = await Order.countDocuments(filter);
+
+    return successResponse(
+      res,
+      {
+        orders,
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+      "Orders fetched successfully",
+    );
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return errorResponse(
+      res,
+      error,
+      "Failed to fetch orders",
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+/**
+ * Update order status (admin only)
+ * PUT /api/admin/orders/:id/status
+ */
+export async function updateOrderStatusAdmin(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return errorResponse(
+        res,
+        null,
+        "Status is required",
+        StatusCodes.BAD_REQUEST,
+      );
+    }
+
+    const validStatuses = [
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return errorResponse(
+        res,
+        null,
+        `Status must be one of: ${validStatuses.join(", ")}`,
+        StatusCodes.BAD_REQUEST,
+      );
+    }
+
+    const order = await Order.findByIdAndUpdate(id, { status }, { new: true })
+      .populate("user", "name email")
+      .populate("items.productId", "name price images");
+
+    if (!order) {
+      return errorResponse(res, null, "Order not found", StatusCodes.NOT_FOUND);
+    }
+
+    return successResponse(res, order, "Order status updated successfully");
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return errorResponse(
+      res,
+      error,
+      "Failed to update order status",
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+/**
+ * Delete order (admin only)
+ * DELETE /api/admin/orders/:id
+ */
+export async function deleteOrder(req, res) {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findByIdAndDelete(id);
+
+    if (!order) {
+      return errorResponse(res, null, "Order not found", StatusCodes.NOT_FOUND);
+    }
+
+    return successResponse(res, null, "Order deleted successfully");
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    return errorResponse(
+      res,
+      error,
+      "Failed to delete order",
+      StatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 }
